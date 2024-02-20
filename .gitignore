@@ -252,6 +252,8 @@ modules.xml
 hs_err_pid*
 replay_pid*
 
+.DS_Store
+
 ### Gradle ###
 .gradle
 **/build/
