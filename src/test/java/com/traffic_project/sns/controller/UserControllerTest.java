@@ -2,6 +2,7 @@ package com.traffic_project.sns.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.traffic_project.sns.domain.dto.UserDto;
 import com.traffic_project.sns.dto.request.UserJoinRequest;
 import com.traffic_project.sns.dto.request.UserLoginRequest;
 import com.traffic_project.sns.exception.ErrorCode;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.mock;
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class UserControllerTest {
 
@@ -43,7 +46,7 @@ public class UserControllerTest {
         String password = "1234";
 
         //when&then
-        when(userService.join(userName, password)).thenReturn(mock(User.class));
+        when(userService.join(userName, password)).thenReturn(mock(UserDto.class));
 
         mockMvc.perform(post("/api/v1/users/join")
                         .contentType(MediaType.APPLICATION_JSON)
