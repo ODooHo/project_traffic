@@ -1,5 +1,6 @@
 package com.traffic_project.sns.fixture;
 
+import com.traffic_project.sns.domain.UserRole;
 import com.traffic_project.sns.domain.entity.UserEntity;
 
 import java.sql.Timestamp;
