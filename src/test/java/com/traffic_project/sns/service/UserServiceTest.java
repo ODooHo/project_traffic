@@ -1,12 +1,12 @@
 package com.traffic_project.sns.service;
 
-import com.traffic_project.sns.domain.entity.UserEntity;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.fixture.TestInfoFixture;
 import com.traffic_project.sns.fixture.UserEntityFixture;
 import com.traffic_project.sns.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@DisplayName("비즈니스로직 - 회원가입과 로그인")
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserServiceTest {
@@ -34,20 +35,22 @@ public class UserServiceTest {
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
+    @DisplayName("회원 정보를 입력하면 회원가입에 성공한다.")
     @Test
     public void givenUserInfo_whenJoining_thenReturnsSuccess() {
         //given
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
         //when
-        when(userRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), fixture.getPassword())));
+        when(userRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.empty());
         when(bCryptPasswordEncoder.encode(fixture.getPassword())).thenReturn("password_encrypt");
-        when(userRepository.save(any())).thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), "password_encrypt")));
+        when(userRepository.save(any())).thenReturn(UserEntityFixture.get(fixture.getUserName(), "password_encrypt"));
 
         //then
         assertDoesNotThrow(() -> userService.join(fixture.getUserName(), fixture.getPassword()));
     }
 
+    @DisplayName("중복된 정보를 입력하면 회원가입에 실패한다.")
     @Test
     void givenDuplicatedInfo_whenJoining_thenReturnsException() {
 
@@ -65,19 +68,21 @@ public class UserServiceTest {
         assertEquals(ErrorCode.DUPLICATED_USER_NAME, exception.getErrorCode());
     }
 
+    @DisplayName("회원 정보를 입력하면 로그인에 성공한다.")
     @Test
     void givenUserInfo_whenLoggingIn_thenReturnsSuccess() {
         //given
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
 
         //when
-        when(userRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.empty());
-
+        when(userRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.of(UserEntityFixture.get(fixture.getUserName(), fixture.getPassword())));
+        when(bCryptPasswordEncoder.matches(any(), any())).thenReturn(true);
         //then
         assertDoesNotThrow(() -> userService.login(fixture.getUserName(), fixture.getPassword()));
 
     }
 
+    @DisplayName("존재하지않는 회원 정보를 입력하면 로그인에 실패한다.")
     @Test
     void givenNotExistsUser_whenLoggingIn_thenReturnsException() {
         //given
@@ -92,7 +97,7 @@ public class UserServiceTest {
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
-
+    @DisplayName("틀린 비밀번호를 입력하면 로그인에 실패한다.")
     @Test
     void givenNotCorrectPassword_whenLoggingIn_thenReturnsException() {
         //given
