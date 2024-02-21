@@ -18,8 +18,8 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseDto<Void> create(@RequestBody PostWriteRequest request, Authentication authentication){
-        postService.create(authentication.getName(),request.title(),request.body());
+    public ResponseDto<Void> create(@RequestBody PostWriteRequest request, Authentication authentication) {
+        postService.create(authentication.getName(), request.title(), request.body());
         return ResponseDto.success();
     }
 
