@@ -8,6 +8,7 @@ import com.traffic_project.sns.dto.request.UserLoginRequest;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@DisplayName("Controller 테스트")
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -38,6 +40,7 @@ public class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @DisplayName("올바른 회원가입 요청이 오면 성공 응답을 반환한다.")
     @Test
     @WithAnonymousUser
     public void givenUserInfo_whenRequestingJoin_thenReturnsOk() throws Exception {
@@ -55,6 +58,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @DisplayName("이미 존재하는 회원정보로 요청이 오면 예외를 반환한다.")
     @Test
     @WithAnonymousUser
     public void givenExistingUserInfo_whenRequestingJoin_thenReturnsException() throws Exception {
@@ -75,6 +79,7 @@ public class UserControllerTest {
     }
 
 
+    @DisplayName("올바른 로그인 요청이 오면 성공 응답을 반환한다.")
     @Test
     @WithAnonymousUser
     public void givenCorrectUserInfo_whenRequestingLogin_thenReturnsSuccess() throws Exception {
@@ -92,6 +97,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @DisplayName("존재하지 않는 정보로 로그인 요청이 오면 예외를 반환한다.")
     @Test
     @WithAnonymousUser
     public void givenNotExistsUser_whenRequestingLogin_thenReturnsException() throws Exception {
@@ -109,6 +115,7 @@ public class UserControllerTest {
                 .andExpect(status().is(ErrorCode.USER_NOT_FOUND.getStatus().value()));
     }
 
+    @DisplayName("틀린 정보로 로그인 요청이 오면 예외를 반환한다.")
     @Test
     @WithAnonymousUser
     public void givenWrongUserInfo_whenRequestingLogin_thenReturnsException() throws Exception {
