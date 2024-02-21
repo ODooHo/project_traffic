@@ -1,6 +1,7 @@
 package com.traffic_project.sns.config;
 
 import com.traffic_project.sns.config.filter.JwtAuthenticationFilter;
+import com.traffic_project.sns.exception.CustomAuthenticationEntryPoint;
 import com.traffic_project.sns.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,22 +25,21 @@ public class AuthenticationConfig {
     private String secretKey;
 
 
-
     @Bean
-    public SecurityFilterChain configure(HttpSecurity httpSecurity)throws Exception{
+    public SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.
                 csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement((sessionManagement)
-                -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorizeHttpRequests)
-                ->authorizeHttpRequests
-                                .requestMatchers(
-                                        "/api/*/users/join",
-                                        "/api/*/users/login").permitAll()
-                                .anyRequest().authenticated()
-                        );
-
-        httpSecurity.addFilterBefore(new JwtAuthenticationFilter(userService, secretKey),UsernamePasswordAuthenticationFilter.class);
+                        -> authorizeHttpRequests
+                        .requestMatchers(
+                                "/api/*/users/join",
+                                "/api/*/users/login").permitAll()
+                        .anyRequest().authenticated())
+                .exceptionHandling((exceptionHandling)
+                        -> exceptionHandling.authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
+                .addFilterBefore(new JwtAuthenticationFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
