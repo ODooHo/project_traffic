@@ -5,7 +5,7 @@ public record PostWriteRequest(
         String body
 ) {
 
-    public static PostWriteRequest of(String title, String body){
-        return new PostWriteRequest(title,body);
+    public static PostWriteRequest of(String title, String body) {
+        return new PostWriteRequest(title, body);
     }
 }

@@ -31,8 +31,8 @@ public class UserService {
     @Transactional
     public UserDto join(String userName, String password) {
         userRepository.findByUserName(userName).ifPresent(
-                it ->{
-                    throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,String.format("userName is %s",userName));
+                it -> {
+                    throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", userName));
                 });
 
         UserEntity userEntity = userRepository.save(UserEntity.of(userName, passwordEncoder.encode(password)));
@@ -46,12 +46,17 @@ public class UserService {
 
                 );
 
-        if(!passwordEncoder.matches(password,userEntity.getPassword())){
+        if (!passwordEncoder.matches(password, userEntity.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
-        return JwtTokenUtils.generateAccessToken(userName,secretKey,expiredTime);
+        return JwtTokenUtils.generateAccessToken(userName, secretKey, expiredTime);
     }
 
+    public UserDto loadUserByUserName(String userName){
+        return userRepository.findByUserName(userName).map(UserDto::from).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
+        );
+    }
 
 
 }

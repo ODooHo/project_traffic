@@ -45,7 +45,7 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void givenNothing_whenRequestingPosting_thenReturnsSuccess() throws Exception {
-        mockMvc.perform(post("api/v1/posts")
+        mockMvc.perform(post("/api/v1/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
                 .andDo(print())
@@ -56,7 +56,7 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void givenNotAuthenticatedUser_whenRequestingPosting_thenReturnsException() throws Exception {
-        mockMvc.perform(post("api/v1/posts")
+        mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
                 .andDo(print())
@@ -67,7 +67,7 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void givenNotAuthenticatedUser_whenRequestingModifyingPost_thenReturnsException() throws Exception {
-        mockMvc.perform(put("api/v1/posts/1")
+        mockMvc.perform(put("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
                 .andDo(print())

@@ -4,7 +4,7 @@ import com.traffic_project.sns.domain.entity.PostEntity;
 
 import java.sql.Timestamp;
 
-public record PostDto (
+public record PostDto(
         Integer id,
         String title,
         String body,
@@ -12,8 +12,8 @@ public record PostDto (
         Timestamp registeredAt,
         Timestamp updatedAt,
         Timestamp removedAt
-){
-    public static PostDto from(PostEntity entity){
+) {
+    public static PostDto from(PostEntity entity) {
         return new PostDto(
                 entity.getId(),
                 entity.getTitle(),
