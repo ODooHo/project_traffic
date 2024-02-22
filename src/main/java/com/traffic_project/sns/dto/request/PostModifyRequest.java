@@ -5,7 +5,7 @@ public record PostModifyRequest(
         String body
 ) {
 
-    public static PostModifyRequest of(String title, String body){
-        return new PostModifyRequest(title,body);
+    public static PostModifyRequest of(String title, String body) {
+        return new PostModifyRequest(title, body);
     }
 }

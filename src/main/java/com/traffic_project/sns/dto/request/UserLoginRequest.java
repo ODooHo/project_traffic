@@ -6,6 +6,6 @@ public record UserLoginRequest(
 ) {
 
     public static UserLoginRequest of(String userName, String password) {
-        return new UserLoginRequest(userName,password);
+        return new UserLoginRequest(userName, password);
     }
 }

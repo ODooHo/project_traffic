@@ -5,15 +5,15 @@ import com.traffic_project.sns.domain.dto.PostDto;
 
 import java.sql.Timestamp;
 
-public record PostResponse (
+public record PostResponse(
         Integer id,
         String title,
         String body,
         UserResponse user,
         Timestamp registeredAt,
         Timestamp updatedAt
-){
-    public static PostResponse from(PostDto post){
+) {
+    public static PostResponse from(PostDto post) {
         return new PostResponse(
                 post.id(),
                 post.title(),

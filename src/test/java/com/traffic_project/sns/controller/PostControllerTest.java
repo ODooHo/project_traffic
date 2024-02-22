@@ -1,18 +1,26 @@
 package com.traffic_project.sns.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.traffic_project.sns.config.SecurityConfig;
+import com.traffic_project.sns.config.TestSecurityConfig;
+import com.traffic_project.sns.domain.UserRole;
+import com.traffic_project.sns.domain.dto.UserDto;
 import com.traffic_project.sns.dto.request.PostModifyRequest;
 import com.traffic_project.sns.dto.request.PostWriteRequest;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.service.PostService;
+import com.traffic_project.sns.util.ClassUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -20,9 +28,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,6 +49,9 @@ public class PostControllerTest {
     @MockBean
     PostService postService;
 
+    @MockBean
+    ClassUtils classUtils;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -45,7 +60,7 @@ public class PostControllerTest {
     @Test
     @WithMockUser
     void givenNothing_whenRequestingPosting_thenReturnsSuccess() throws Exception {
-        mockMvc.perform(post("api/v1/posts")
+        mockMvc.perform(post("/api/v1/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
                 .andDo(print())
@@ -54,9 +69,9 @@ public class PostControllerTest {
 
     @DisplayName("로그인하지 않은 사용자로 포스팅 요청이 오면 예외를 반환한다.")
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     void givenNotAuthenticatedUser_whenRequestingPosting_thenReturnsException() throws Exception {
-        mockMvc.perform(post("api/v1/posts")
+        mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
                 .andDo(print())
@@ -65,9 +80,9 @@ public class PostControllerTest {
 
     @DisplayName("로그인하지 않은 사용자로 포스팅 수정 요청이 오면 예외를 반환한다.")
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     void givenNotAuthenticatedUser_whenRequestingModifyingPost_thenReturnsException() throws Exception {
-        mockMvc.perform(put("api/v1/posts/1")
+        mockMvc.perform(put("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
                 .andDo(print())
@@ -76,7 +91,7 @@ public class PostControllerTest {
 
     @DisplayName("본인이 작성하지 않은 글로 포스팅 수정 요청이 오면 예외를 반환한다.")
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     void givenNotWriter_whenRequestingModifyingPost_thenReturnsException() throws Exception {
         doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION)).when(postService).modify(any(), eq(1), eq("title"), eq("body"));
         mockMvc.perform(put("/api/v1/posts/1")
@@ -88,7 +103,6 @@ public class PostControllerTest {
 
     @DisplayName("없는 글로 포스팅 수정 요청이 오면 예외를 반환한다.")
     @Test
-    @WithMockUser
     void givenNotExistingPost_whenRequestingModifyingPost_thenReturnsException() throws Exception {
         doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).modify(any(), eq(1), eq("title"), eq("body"));
         mockMvc.perform(put("/api/v1/posts/1")
@@ -105,7 +119,7 @@ public class PostControllerTest {
         doThrow(new SnsApplicationException(ErrorCode.DATABASE_ERROR)).when(postService).modify(any(), eq(1), eq("title"), eq("body"));
         mockMvc.perform(put("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(new PostModifyRequest("title", "body"))))
+                        .content(objectMapper.writeValueAsBytes(PostModifyRequest.of("title", "body"))))
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.DATABASE_ERROR.getStatus().value()));
     }
@@ -122,7 +136,7 @@ public class PostControllerTest {
 
     @DisplayName("본인이 작성하지 않은 글로 삭제 요청 시 예외를 반환한다.")
     @Test
-    @WithMockUser
+    @WithAnonymousUser
     void givenNotWriter_whenRequestingDeletingPost_thenReturnsException() throws Exception {
         doThrow(new SnsApplicationException(ErrorCode.INVALID_PERMISSION)).when(postService).delete(any(), eq(1));
         mockMvc.perform(delete("/api/v1/posts/1")
@@ -134,7 +148,6 @@ public class PostControllerTest {
 
     @DisplayName("없는 글로 포스트 삭제 요청 시 예외를 반환한다.")
     @Test
-    @WithMockUser
     void givenNotExistingPost_whenRequestingDeletingPost_thenReturnsException() throws Exception {
         doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).delete(any(), eq(1));
 

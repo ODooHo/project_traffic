@@ -7,7 +7,7 @@ public record UserResponse(
         String userName
 ) {
 
-    public static UserResponse from(UserDto user){
+    public static UserResponse from(UserDto user) {
         return new UserResponse(
                 user.id(),
                 user.username()
