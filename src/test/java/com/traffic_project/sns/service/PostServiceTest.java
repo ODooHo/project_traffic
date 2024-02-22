@@ -9,6 +9,7 @@ import com.traffic_project.sns.fixture.UserEntityFixture;
 import com.traffic_project.sns.repository.PostRepository;
 import com.traffic_project.sns.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -69,6 +70,7 @@ public class PostServiceTest {
         assertEquals(ErrorCode.POST_NOT_FOUND, exception.getErrorCode());
     }
 
+    @Disabled("존재하지 않는 유저는 토큰 필터에서 걸러짐")
     @DisplayName("존재하지 않는 유저가 포스트에 수정 요청할 시 예외를 반환한다.")
     @Test
     void givenNotExistsUSer_whenRequestingModifyPost_thenReturnsException() {
@@ -104,6 +106,7 @@ public class PostServiceTest {
         assertEquals(ErrorCode.POST_NOT_FOUND, exception.getErrorCode());
     }
 
+    @Disabled("존재하지 않는 유저는 토큰 필터에서 걸러짐")
     @DisplayName("존재하지 않는 유저가 삭제 요청 시 예외를 반환한다.")
     @Test
     void givenNotExistsUser_whenRequestingDeletePost_thenReturnsException() {

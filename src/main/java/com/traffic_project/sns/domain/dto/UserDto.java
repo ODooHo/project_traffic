@@ -13,27 +13,18 @@ import java.util.Collection;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record UserDto(
-        Integer id,
-        String username,
-        String password,
-        UserRole role,
-        Timestamp registeredAt,
-        Timestamp updatedAt,
-        Timestamp removedAt
-)  implements UserDetails {
+public record UserDto(Integer id, String username, String password, UserRole role, Timestamp registeredAt,
+                      Timestamp updatedAt, Timestamp removedAt) implements UserDetails {
 
     public static UserDto from(UserEntity entity) {
-        return new UserDto(
-                entity.getId(),
-                entity.getUserName(),
-                entity.getPassword(),
-                entity.getRole(),
-                entity.getRegisteredAt(),
-                entity.getUpdatedAt(),
-                entity.getRemovedAt()
-        );
+        return new UserDto(entity.getId(), entity.getUserName(), entity.getPassword(), entity.getRole(), entity.getRegisteredAt(), entity.getUpdatedAt(), entity.getRemovedAt());
     }
+
+
+    public static UserDto of(Integer id, String username, String password, UserRole role, Timestamp registeredAt, Timestamp updatedAt, Timestamp removedAt) {
+        return new UserDto(id, username, password, role, registeredAt, updatedAt, removedAt);
+    }
+
 
     @Override
     @JsonIgnore
