@@ -1,10 +1,6 @@
 package com.traffic_project.sns.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.traffic_project.sns.config.SecurityConfig;
-import com.traffic_project.sns.config.TestSecurityConfig;
-import com.traffic_project.sns.domain.UserRole;
-import com.traffic_project.sns.domain.dto.UserDto;
 import com.traffic_project.sns.dto.request.PostModifyRequest;
 import com.traffic_project.sns.dto.request.PostWriteRequest;
 import com.traffic_project.sns.exception.ErrorCode;
@@ -15,21 +11,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.sql.Timestamp;
-import java.time.Instant;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -61,8 +51,8 @@ public class PostControllerTest {
     @WithMockUser
     void givenNothing_whenRequestingPosting_thenReturnsSuccess() throws Exception {
         mockMvc.perform(post("/api/v1/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title", "body"))))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -73,7 +63,7 @@ public class PostControllerTest {
     void givenNotAuthenticatedUser_whenRequestingPosting_thenReturnsException() throws Exception {
         mockMvc.perform(post("/api/v1/posts")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
+                        .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title", "body"))))
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
     }
@@ -84,7 +74,7 @@ public class PostControllerTest {
     void givenNotAuthenticatedUser_whenRequestingModifyingPost_thenReturnsException() throws Exception {
         mockMvc.perform(put("/api/v1/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title","body"))))
+                        .content(objectMapper.writeValueAsBytes(PostWriteRequest.of("title", "body"))))
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.INVALID_TOKEN.getStatus().value()));
     }
@@ -168,5 +158,52 @@ public class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().is(ErrorCode.DATABASE_ERROR.getStatus().value()));
     }
+
+    @DisplayName("피드목록 요청시 성공 응답을 반환한다.")
+    @Test
+    @WithMockUser
+    void givenNothing_whenRequestingFeedList_thenReturnsSuccess() throws Exception {
+        when(postService.list(any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("로그인하지 않은 사용자가 피드 목록 요청 시 예외를 반환한다.")
+    @Test
+    @WithAnonymousUser
+    void givenNotAuthenticatedUser_whenRequestingFeedList_thenReturnsException() throws Exception {
+        when(postService.list(any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @DisplayName("내 피드목록 요청시 성공 응답을 반환한다.")
+    @Test
+    @WithMockUser
+    void givenNothing_whenRequestingMyFeedList_thenReturnsSuccess() throws Exception {
+        when(postService.my(any(),any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("로그인하지 않은 사용자가 내 피드 목록 요청 시 예외를 반환한다.")
+    @Test
+    @WithAnonymousUser
+    void givenNotAuthenticatedUser_whenRequestingMyFeedList_thenReturnsException() throws Exception {
+        when(postService.my(any(),any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/posts/my")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+
+
 
 }

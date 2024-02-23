@@ -8,6 +8,8 @@ import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.repository.PostRepository;
 import com.traffic_project.sns.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,4 +57,14 @@ public class PostService {
         }
         postRepository.delete(postEntity);
     }
+
+
+    public Page<PostDto> my(Integer userId, Pageable pageable) {
+        return postRepository.findAllByUserId(userId,pageable).map(PostDto::from);
+    }
+
+    public Page<PostDto> list(Pageable pageable) {
+        return postRepository.findAll(pageable).map(PostDto::from);
+    }
 }
+

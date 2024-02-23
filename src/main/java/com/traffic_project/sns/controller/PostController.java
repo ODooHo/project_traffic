@@ -8,6 +8,8 @@ import com.traffic_project.sns.dto.response.ResponseDto;
 import com.traffic_project.sns.service.PostService;
 import com.traffic_project.sns.util.ClassUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +39,18 @@ public class PostController {
         UserDto user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), UserDto.class);
         postService.delete(user.id(),postId);
         return ResponseDto.success();
+    }
+
+
+    @GetMapping
+    public ResponseDto<Page<PostResponse>> list(Pageable pageable, Authentication authentication) {
+        return ResponseDto.success(postService.list(pageable).map(PostResponse::from));
+    }
+
+    @GetMapping("/my")
+    public ResponseDto<Page<PostResponse>> myPosts(Pageable pageable, Authentication authentication) {
+        UserDto user = ClassUtils.getSafeCastInstance(authentication.getPrincipal(), UserDto.class);
+        return ResponseDto.success(postService.my(user.id(), pageable).map(PostResponse::from));
     }
 
 

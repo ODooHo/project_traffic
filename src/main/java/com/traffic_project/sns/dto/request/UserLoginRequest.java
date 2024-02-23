@@ -1,7 +1,7 @@
 package com.traffic_project.sns.dto.request;
 
 public record UserLoginRequest(
-        String userName,
+        String name,
         String password
 ) {
 
