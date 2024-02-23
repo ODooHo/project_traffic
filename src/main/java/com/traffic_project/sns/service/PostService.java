@@ -66,5 +66,9 @@ public class PostService {
     public Page<PostDto> list(Pageable pageable) {
         return postRepository.findAll(pageable).map(PostDto::from);
     }
+
+    public void like(Integer postId, String userName) {
+
+    }
 }
 
