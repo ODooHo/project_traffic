@@ -1,11 +1,13 @@
 package com.traffic_project.sns.service;
 
+import com.traffic_project.sns.domain.entity.LikeEntity;
 import com.traffic_project.sns.domain.entity.PostEntity;
 import com.traffic_project.sns.domain.entity.UserEntity;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.fixture.TestInfoFixture;
 import com.traffic_project.sns.fixture.UserEntityFixture;
+import com.traffic_project.sns.repository.LikeRepository;
 import com.traffic_project.sns.repository.PostRepository;
 import com.traffic_project.sns.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -40,6 +42,9 @@ public class PostServiceTest {
 
     @MockBean
     PostRepository postRepository;
+
+    @MockBean
+    LikeRepository likeRepository;
 
     @DisplayName("올바른 정보 입력시 포스트 생성이 성공한다.")
     @Test
@@ -141,9 +146,9 @@ public class PostServiceTest {
     void givenNotExistsUser_whenRequestingMyFeedList_thenReturnsException() {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
         when(userRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.empty());
-        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> postService.my(fixture.getUserId(), mock(Pageable.class)));
+        SnsApplicationException exception = assertThrows(SnsApplicationException.class, () -> postService.my(fixture.getUserId(), mock(Pageable.class)));
 
-        Assertions.assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
 
@@ -152,7 +157,7 @@ public class PostServiceTest {
     void givenUser_whenRequestingFeedList_thenReturnsSuccess() {
         Pageable pageable = mock(Pageable.class);
         when(postRepository.findAll(pageable)).thenReturn(Page.empty());
-        Assertions.assertDoesNotThrow(() -> postService.list(pageable));
+        assertDoesNotThrow(() -> postService.list(pageable));
     }
 
     @DisplayName("올바른 사용자가 내 포스트 목록을 요청할 시 성공한다.")
@@ -161,8 +166,33 @@ public class PostServiceTest {
         TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
         Pageable pageable = mock(Pageable.class);
         when(postRepository.findAllByUserId(any(), eq(pageable))).thenReturn(Page.empty());
-        Assertions.assertDoesNotThrow(() -> postService.my(fixture.getUserId(), pageable));
+        assertDoesNotThrow(() -> postService.my(fixture.getUserId(), pageable));
     }
+
+    @DisplayName("올바른 사용자가 좋아요 요청할 시 성공한다.")
+    @Test
+    void givenUser_whenRequestingLikes_thenReturnsSuccess() {
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+
+        when(postRepository.findById(any())).thenReturn(Optional.of(mock(PostEntity.class)));
+        when(userRepository.findByUserName(any())).thenReturn(Optional.of(mock(UserEntity.class)));
+        assertDoesNotThrow(() -> postService.like(fixture.getPostId(), fixture.getUserName()));
+    }
+
+    @DisplayName("이미 좋아요를 누른 경우, 예외를 반환한다.")
+    @Test
+    void givenAlreadyLikedUser_whenRequestingLikes_thenReturnsException() {
+        PostEntity mockPostEntity = mock(PostEntity.class);
+        UserEntity mockUserEntity = mock(UserEntity.class);
+        LikeEntity mockLikeEntity = mock(LikeEntity.class);
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+        when(postRepository.findById(any())).thenReturn(Optional.of(mockPostEntity));
+        when(userRepository.findByUserName(any())).thenReturn(Optional.of(mockUserEntity));
+        when(likeRepository.findByUserAndPost(eq(mockUserEntity),eq(mockPostEntity))).thenReturn(Optional.of(mockLikeEntity));
+        SnsApplicationException exception = assertThrows(SnsApplicationException.class, () -> postService.like(fixture.getPostId(),fixture.getUserName()));
+        assertEquals(ErrorCode.ALREADY_LIKED_POST, exception.getErrorCode());
+    }
+
 
 
 }
