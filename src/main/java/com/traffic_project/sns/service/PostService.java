@@ -1,11 +1,14 @@
 package com.traffic_project.sns.service;
 
+import com.traffic_project.sns.domain.dto.CommentDto;
 import com.traffic_project.sns.domain.dto.PostDto;
+import com.traffic_project.sns.domain.entity.CommentEntity;
 import com.traffic_project.sns.domain.entity.LikeEntity;
 import com.traffic_project.sns.domain.entity.PostEntity;
 import com.traffic_project.sns.domain.entity.UserEntity;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
+import com.traffic_project.sns.repository.CommentRepository;
 import com.traffic_project.sns.repository.LikeRepository;
 import com.traffic_project.sns.repository.PostRepository;
 import com.traffic_project.sns.repository.UserRepository;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.stream.events.Comment;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,6 +28,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
 
     public void create(String userName, String title, String body) {
@@ -41,7 +46,7 @@ public class PostService {
                         ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId)
                 ));
 
-        if(!Objects.equals(postEntity.getUser().getId(),userId)){
+        if (!Objects.equals(postEntity.getUser().getId(), userId)) {
             throw new SnsApplicationException(
                     ErrorCode.INVALID_PERMISSION,
                     String.format("user %s has no permission with post %d", userId, postId
@@ -55,7 +60,9 @@ public class PostService {
 
     @Transactional
     public void delete(Integer userId, Integer postId) {
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId)));
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId))
+        );
         if (!Objects.equals(postEntity.getUser().getId(), userId)) {
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("user %s has no permission with post %d", userId, postId));
         }
@@ -64,7 +71,7 @@ public class PostService {
 
 
     public Page<PostDto> my(Integer userId, Pageable pageable) {
-        return postRepository.findAllByUserId(userId,pageable).map(PostDto::from);
+        return postRepository.findAllByUserId(userId, pageable).map(PostDto::from);
     }
 
     public Page<PostDto> list(Pageable pageable) {
@@ -72,26 +79,44 @@ public class PostService {
     }
 
     public void like(Integer postId, String userName) {
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId)));
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId))
+        );
         UserEntity userEntity = userRepository.findByUserName(userName).orElseThrow(
                 () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
         );
 
-        likeRepository.findByUserAndPost(userEntity,postEntity).ifPresent(it ->{
+        likeRepository.findByUserAndPost(userEntity, postEntity).ifPresent(it -> {
             throw new SnsApplicationException(ErrorCode.ALREADY_LIKED_POST, String.format("userName %s already like the post %s", userName, postId));
         });
 
-        likeRepository.save(LikeEntity.of(postEntity,userEntity));
+        likeRepository.save(LikeEntity.of(postEntity, userEntity));
     }
 
     public Integer getLikeCount(Integer postId) {
-        PostEntity postEntity = postRepository.findById(postId).orElseThrow(() -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId)));
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId))
+        );
         List<LikeEntity> likes = likeRepository.findAllByPost(postEntity);
         return likes.size();
     }
 
-    public void comment(Integer postId, String userName, String comment){
+    public void comment(Integer postId, String userName, String comment) {
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId))
+        );
+        UserEntity userEntity = userRepository.findByUserName(userName).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
+        );
 
+        commentRepository.save(CommentEntity.of(comment, postEntity, userEntity));
+    }
+
+    public Page<CommentDto> getComments(Integer postId, Pageable pageable) {
+        PostEntity postEntity = postRepository.findById(postId).orElseThrow(
+                () -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId))
+        );
+        return commentRepository.findAllByPost(postEntity, pageable).map(CommentDto::from);
     }
 
 }
