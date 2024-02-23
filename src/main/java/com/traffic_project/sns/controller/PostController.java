@@ -1,6 +1,7 @@
 package com.traffic_project.sns.controller;
 
 import com.traffic_project.sns.domain.dto.UserDto;
+import com.traffic_project.sns.dto.request.PostCommentRequest;
 import com.traffic_project.sns.dto.request.PostModifyRequest;
 import com.traffic_project.sns.dto.request.PostWriteRequest;
 import com.traffic_project.sns.dto.response.PostResponse;
@@ -62,6 +63,12 @@ public class PostController {
     @GetMapping("/{postId}/likes")
     public ResponseDto<Integer> getLikes(@PathVariable Integer postId, Authentication authentication) {
         return ResponseDto.success(postService.getLikeCount(postId));
+    }
+
+    @PostMapping("/{postId}/comments")
+    public ResponseDto<Void> comment(@PathVariable Integer postId, @RequestBody PostCommentRequest request, Authentication authentication){
+        postService.comment(postId, authentication.getName(), request.comment());
+        return ResponseDto.success();
     }
 
 

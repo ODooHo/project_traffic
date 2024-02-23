@@ -90,5 +90,9 @@ public class PostService {
         return likes.size();
     }
 
+    public void comment(Integer postId, String userName, String comment){
+
+    }
+
 }
 
