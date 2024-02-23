@@ -292,7 +292,7 @@ public class PostControllerTest {
     @WithMockUser
     void givenNotExistsPost_whenRequestingComments_thenReturnsException() throws Exception {
         //given
-        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(),any(),any());
+        doThrow(new SnsApplicationException(ErrorCode.POST_NOT_FOUND)).when(postService).comment(any(), any(), any());
         //when&then
         mockMvc.perform(post("/api/v1/posts/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -300,5 +300,6 @@ public class PostControllerTest {
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
+
 
 }

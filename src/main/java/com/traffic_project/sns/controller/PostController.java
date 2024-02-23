@@ -4,6 +4,7 @@ import com.traffic_project.sns.domain.dto.UserDto;
 import com.traffic_project.sns.dto.request.PostCommentRequest;
 import com.traffic_project.sns.dto.request.PostModifyRequest;
 import com.traffic_project.sns.dto.request.PostWriteRequest;
+import com.traffic_project.sns.dto.response.CommentResponse;
 import com.traffic_project.sns.dto.response.PostResponse;
 import com.traffic_project.sns.dto.response.ResponseDto;
 import com.traffic_project.sns.service.PostService;
@@ -69,6 +70,11 @@ public class PostController {
     public ResponseDto<Void> comment(@PathVariable Integer postId, @RequestBody PostCommentRequest request, Authentication authentication){
         postService.comment(postId, authentication.getName(), request.comment());
         return ResponseDto.success();
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseDto<Page<CommentResponse>> getComments(@PathVariable Integer postId, Pageable pageable){
+        return ResponseDto.success(postService.getComments(postId,pageable).map(CommentResponse::from));
     }
 
 

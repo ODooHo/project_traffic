@@ -13,14 +13,14 @@ public record PostResponse(
         Timestamp registeredAt,
         Timestamp updatedAt
 ) {
-    public static PostResponse from(PostDto post) {
+    public static PostResponse from(PostDto dto) {
         return new PostResponse(
-                post.id(),
-                post.title(),
-                post.body(),
-                UserResponse.from(post.user()),
-                post.registeredAt(),
-                post.updatedAt()
+                dto.id(),
+                dto.title(),
+                dto.body(),
+                UserResponse.from(dto.user()),
+                dto.registeredAt(),
+                dto.updatedAt()
         );
     }
 }
