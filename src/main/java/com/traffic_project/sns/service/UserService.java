@@ -32,7 +32,7 @@ public class UserService {
     public UserDto join(String userName, String password) {
         userRepository.findByUserName(userName).ifPresent(
                 it -> {
-                    throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("userName is %s", userName));
+                    throw new SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, String.format("name is %s", userName));
                 });
 
         UserEntity userEntity = userRepository.save(UserEntity.of(userName, passwordEncoder.encode(password)));

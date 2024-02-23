@@ -36,7 +36,8 @@ public class AuthenticationConfig {
                         .requestMatchers(
                                 "/api/*/users/join",
                                 "/api/*/users/login").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll())
                 .exceptionHandling((exceptionHandling)
                         -> exceptionHandling.authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .addFilterBefore(new JwtAuthenticationFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class);
