@@ -53,5 +53,10 @@ public class PostController {
         return ResponseDto.success(postService.my(user.id(), pageable).map(PostResponse::from));
     }
 
+    @PostMapping("/{postId}/likes")
+    public ResponseDto<Void> like(@PathVariable Integer postId, Authentication authentication){
+        postService.like(postId, authentication.getName());
+        return ResponseDto.success();
+    }
 
 }

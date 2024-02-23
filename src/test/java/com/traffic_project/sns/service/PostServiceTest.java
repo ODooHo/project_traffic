@@ -16,12 +16,15 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -130,6 +133,35 @@ public class PostServiceTest {
         when(mockPostEntity.getUser()).thenReturn(mock(UserEntity.class));
         SnsApplicationException exception = assertThrows(SnsApplicationException.class, () -> postService.delete(fixture.getUserId(), fixture.getPostId()));
         assertEquals(ErrorCode.INVALID_PERMISSION, exception.getErrorCode());
+    }
+
+    @Disabled("존재하지 않는 유저는 토큰 필터에서 걸러짐")
+    @DisplayName("존재하지 않는 사용자가 내 포스트 목록을 요청할 시 예외를 반환한다.")
+    @Test
+    void givenNotExistsUser_whenRequestingMyFeedList_thenReturnsException() {
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+        when(userRepository.findByUserName(fixture.getUserName())).thenReturn(Optional.empty());
+        SnsApplicationException exception = Assertions.assertThrows(SnsApplicationException.class, () -> postService.my(fixture.getUserId(), mock(Pageable.class)));
+
+        Assertions.assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+
+    @DisplayName("올바른 사용자가 포스트 목록을 요청할 시 성공한다.")
+    @Test
+    void givenUser_whenRequestingFeedList_thenReturnsSuccess() {
+        Pageable pageable = mock(Pageable.class);
+        when(postRepository.findAll(pageable)).thenReturn(Page.empty());
+        Assertions.assertDoesNotThrow(() -> postService.list(pageable));
+    }
+
+    @DisplayName("올바른 사용자가 내 포스트 목록을 요청할 시 성공한다.")
+    @Test
+    void givenUser_whenRequestingMyFeedList_thenReturnsSuccess() {
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+        Pageable pageable = mock(Pageable.class);
+        when(postRepository.findAllByUserId(any(), eq(pageable))).thenReturn(Page.empty());
+        Assertions.assertDoesNotThrow(() -> postService.my(fixture.getUserId(), pageable));
     }
 
 
