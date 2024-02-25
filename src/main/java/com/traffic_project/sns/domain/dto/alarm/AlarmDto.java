@@ -9,7 +9,7 @@ public record AlarmDto(
         AlarmType alarmType,
         AlarmArgs args,
         Timestamp registeredAt,
-        Timestamp updateAt,
+        Timestamp updatedAt,
         Timestamp removedAt
 ) {
 
@@ -18,6 +18,12 @@ public record AlarmDto(
     }
 
     public static AlarmDto from(AlarmEntity entity){
-
+        return new AlarmDto(entity.getId(),
+                entity.getAlarmType(),
+                entity.getArgs(),
+                entity.getRegisteredAt(),
+                entity.getUpdatedAt(),
+                entity.getRemovedAt()
+        );
     }
 }

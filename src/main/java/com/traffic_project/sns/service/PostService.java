@@ -2,16 +2,12 @@ package com.traffic_project.sns.service;
 
 import com.traffic_project.sns.domain.dto.CommentDto;
 import com.traffic_project.sns.domain.dto.PostDto;
-import com.traffic_project.sns.domain.entity.CommentEntity;
-import com.traffic_project.sns.domain.entity.LikeEntity;
-import com.traffic_project.sns.domain.entity.PostEntity;
-import com.traffic_project.sns.domain.entity.UserEntity;
+import com.traffic_project.sns.domain.dto.alarm.AlarmArgs;
+import com.traffic_project.sns.domain.dto.alarm.AlarmType;
+import com.traffic_project.sns.domain.entity.*;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
-import com.traffic_project.sns.repository.CommentRepository;
-import com.traffic_project.sns.repository.LikeRepository;
-import com.traffic_project.sns.repository.PostRepository;
-import com.traffic_project.sns.repository.UserRepository;
+import com.traffic_project.sns.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +25,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final AlarmRepository alarmRepository;
 
 
     public void create(String userName, String title, String body) {
@@ -91,6 +88,9 @@ public class PostService {
         });
 
         likeRepository.save(LikeEntity.of(postEntity, userEntity));
+
+        alarmRepository.save(AlarmEntity.of(AlarmType.NEW_LIKE_ON_POST,new AlarmArgs(userEntity.getId(),postEntity.getId()),postEntity.getUser()));
+
     }
 
     public Integer getLikeCount(Integer postId) {
@@ -108,8 +108,9 @@ public class PostService {
         UserEntity userEntity = userRepository.findByUserName(userName).orElseThrow(
                 () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
         );
-
         commentRepository.save(CommentEntity.of(comment, postEntity, userEntity));
+
+        alarmRepository.save(AlarmEntity.of(AlarmType.NEW_COMMENT_ON_POST,new AlarmArgs(userEntity.getId(),postEntity.getId()),postEntity.getUser()));
     }
 
     public Page<CommentDto> getComments(Integer postId, Pageable pageable) {

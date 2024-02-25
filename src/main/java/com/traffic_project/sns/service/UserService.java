@@ -6,6 +6,7 @@ import com.traffic_project.sns.domain.entity.UserEntity;
 import com.traffic_project.sns.dto.response.ResponseDto;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
+import com.traffic_project.sns.repository.AlarmRepository;
 import com.traffic_project.sns.repository.UserRepository;
 import com.traffic_project.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AlarmRepository alarmRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret-key}")
@@ -63,7 +65,7 @@ public class UserService {
 
     @Transactional
     public Page<AlarmDto> alarmList(Integer userId, Pageable pageable){
-        return Page.empty();
+        return alarmRepository.findAllByUserId(userId,pageable).map(AlarmDto::from);
     }
 
 
