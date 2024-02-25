@@ -1,6 +1,5 @@
 package com.traffic_project.sns.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.traffic_project.sns.domain.dto.UserDto;
 import com.traffic_project.sns.dto.request.UserJoinRequest;
@@ -14,14 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -133,6 +136,28 @@ public class UserControllerTest {
                 .andExpect(status().is(ErrorCode.INVALID_PASSWORD.getStatus().value()));
     }
 
+    @DisplayName("알람 페이지를 호출하면 성공 응답을 반환한다.")
+    @Test
+    @WithMockUser
+    void givenNothing_whenRequestingAlarmList_thenReturnsSuccess() throws Exception {
+        //when&then
+        when(userService.alarmList(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/users/alarm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isOk());
+    }
 
+    @DisplayName("로그인하지 않은 유저가 알람 페이지를 호출하면 예외를 반환한다.")
+    @Test
+    @WithAnonymousUser
+    void givenNotAuthenticatedUser_whenRequestingAlarmList_thenReturnSuccess() throws Exception {
+        //when&then
+        when(userService.alarmList(any(), any())).thenReturn(Page.empty());
+        mockMvc.perform(get("/api/v1/users/alarm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
 
 }
