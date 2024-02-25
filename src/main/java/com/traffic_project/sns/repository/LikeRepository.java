@@ -18,11 +18,9 @@ public interface LikeRepository extends JpaRepository<LikeEntity,Integer> {
 
     List<LikeEntity> findAllByPost(PostEntity postEntity);
 
-    /**
-     * TODO:게시글 삭제에 의한 좋아요 삭제 로직을 미리 작성하였는데, 오류가 있어서 추후 해결 필요
-     */
-//    @Transactional
-//    @Modifying
-//    @Query("UPDATE LikeEntity entity SET removed_At = NOW() where entity.post = :post")
-//    void deleteAllByPost(@Param("post") PostEntity post);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE LikeEntity entity SET entity.removedAt = CURRENT_TIMESTAMP where entity.post = :post")
+    void deleteAllByPost(@Param("post") PostEntity post);
 }

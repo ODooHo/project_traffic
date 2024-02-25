@@ -63,6 +63,9 @@ public class PostService {
         if (!Objects.equals(postEntity.getUser().getId(), userId)) {
             throw new SnsApplicationException(ErrorCode.INVALID_PERMISSION, String.format("user %s has no permission with post %d", userId, postId));
         }
+
+        likeRepository.deleteAllByPost(postEntity);
+        commentRepository.deleteAllByPost(postEntity);
         postRepository.delete(postEntity);
     }
 
