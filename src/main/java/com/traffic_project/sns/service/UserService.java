@@ -1,18 +1,20 @@
 package com.traffic_project.sns.service;
 
 import com.traffic_project.sns.domain.dto.UserDto;
+import com.traffic_project.sns.domain.dto.alarm.AlarmDto;
 import com.traffic_project.sns.domain.entity.UserEntity;
+import com.traffic_project.sns.dto.response.ResponseDto;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.repository.UserRepository;
 import com.traffic_project.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +58,12 @@ public class UserService {
         return userRepository.findByUserName(userName).map(UserDto::from).orElseThrow(
                 () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
         );
+    }
+
+
+    @Transactional
+    public Page<AlarmDto> alarmList(Integer userId, Pageable pageable){
+        return Page.empty();
     }
 
 
