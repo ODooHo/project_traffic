@@ -4,6 +4,7 @@ import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.fixture.TestInfoFixture;
 import com.traffic_project.sns.fixture.UserEntityFixture;
+import com.traffic_project.sns.repository.AlarmRepository;
 import com.traffic_project.sns.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -30,6 +33,9 @@ public class UserServiceTest {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private AlarmRepository alarmRepository;
 
     @MockBean
     BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -112,6 +118,18 @@ public class UserServiceTest {
 
         //then
         assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
+    }
+
+    @DisplayName("알람 리스트를 요청하면 성공한다.")
+    @Test
+    void givenNothing_whenGetAlarmList_thenReturnsSuccess(){
+        //given
+        TestInfoFixture.TestInfo fixture = TestInfoFixture.get();
+        Pageable pageable = mock(Pageable.class);
+        //when
+        when(alarmRepository.findAllByUserId(fixture.getUserId(),pageable)).thenReturn(Page.empty());
+        //then
+        assertDoesNotThrow(() -> userService.alarmList(fixture.getUserId(),pageable));
     }
 
 
