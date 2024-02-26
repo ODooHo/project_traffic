@@ -1,5 +1,10 @@
 # 대용량 트래픽 상황을 고려한 간단한 SNS 서비스
 
+## 개발환경
+
+## 세부 기술스택
+
+
 ## Application Architecture 
 ![system architecture](./doc/SystemArchitecture.png)
 
