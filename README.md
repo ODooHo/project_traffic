@@ -1,9 +1,20 @@
 # 대용량 트래픽 상황을 고려한 간단한 SNS 서비스
 
 ## 개발환경
-
+* Intellij IDEA Ultimate 2023.3.2
+* Java 17
+* Gradle 8.5.0
+* Spring Boot 3.2.2
 ## 세부 기술스택
-
+* Spring Web
+* Spring Data JPA
+* Spring Security
+* PostgreSQL
+* JWT
+* Redis
+* Kafka
+* H2 Database
+* Lombok
 
 ## Application Architecture 
 ![system architecture](./doc/SystemArchitecture.png)
