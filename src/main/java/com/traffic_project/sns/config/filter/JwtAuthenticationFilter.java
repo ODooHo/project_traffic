@@ -28,39 +28,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     private final String secretKey;
+
+    private final static List<String> TOKEN_IN_PARAM_URLS = List.of("/api/v1/users/alarm/subscribe");
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
         final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if(header == null || !header.startsWith("Bearer ")){
-            log.error("Error occurs while getting header");
-            filterChain.doFilter(request,response);
-            return;
-        }
+        final String token;
+        try {
+            if (TOKEN_IN_PARAM_URLS.contains(request.getRequestURI())) {
+                log.info("Request with {} check the query param", request.getRequestURI());
+                token = request.getQueryString().split("=")[1].trim();
+            } else if (header == null || !header.startsWith("Bearer ")) {
+                log.error("Authorization Header does not start with Bearer {}", request.getRequestURI());
+                filterChain.doFilter(request, response);
+                return;
+            } else {
+                token = header.split(" ")[1].trim();
+            }
 
-        try{
-            final String token = header.split(" ")[1].trim();
+            String userName = JwtTokenUtils.getUsername(token, secretKey);
+            UserDto userDetails = userService.loadUserByUserName(userName);
 
-            if(JwtTokenUtils.isTokenExpired(token,secretKey)){
-                log.error("Key is expired");
-                filterChain.doFilter(request,response);
+            if (!JwtTokenUtils.validate(token, userDetails.getUsername(), secretKey)) {
+                filterChain.doFilter(request, response);
                 return;
             }
-            String userName = JwtTokenUtils.getUsername(token,secretKey);
-            UserDto user = userService.loadUserByUserName(userName);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            user,null, user.getAuthorities());
-
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null,
+                    userDetails.getAuthorities()
+            );
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        }catch (Exception e){
-            log.error("Error occurs while validating. {} ",e.toString());
-            filterChain.doFilter(request,response);
+        } catch (RuntimeException e) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
+
     }
 }
