@@ -5,11 +5,13 @@ import com.traffic_project.sns.exception.CustomAuthenticationEntryPoint;
 import com.traffic_project.sns.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,6 +29,19 @@ public class AuthenticationConfig {
 
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer(){
+        return (web) ->{
+            web.ignoring()
+                    .requestMatchers(
+                            PathRequest.toStaticResources().atCommonLocations()
+                    )
+                    .requestMatchers(
+                            "/api/*/users/join",
+                            "/api/*/users/login");
+        };
+    }
+
+    @Bean
     public SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
@@ -34,10 +49,6 @@ public class AuthenticationConfig {
                         -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorizeHttpRequests)
                         -> authorizeHttpRequests
-                        .requestMatchers("^(?!/api/).*").permitAll()
-                        .requestMatchers(
-                                "/api/*/users/join",
-                                "/api/*/users/login").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .exceptionHandling((exceptionHandling)
