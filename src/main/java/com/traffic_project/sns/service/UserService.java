@@ -7,6 +7,7 @@ import com.traffic_project.sns.dto.response.ResponseDto;
 import com.traffic_project.sns.exception.ErrorCode;
 import com.traffic_project.sns.exception.SnsApplicationException;
 import com.traffic_project.sns.repository.AlarmRepository;
+import com.traffic_project.sns.repository.UserCacheRepository;
 import com.traffic_project.sns.repository.UserRepository;
 import com.traffic_project.sns.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final AlarmRepository alarmRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final UserCacheRepository redisRepository;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -31,6 +33,12 @@ public class UserService {
     @Value("${jwt.token.expired-time-ms}")
     private Long expiredTime;
 
+    public UserDto loadUserByUserName(String userName){
+        return redisRepository.getUser(userName).orElseGet(
+                () -> userRepository.findByUserName(userName).map(UserDto::from).orElseThrow(
+                        () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
+                ));
+    }
 
     @Transactional
     public UserDto join(String userName, String password) {
@@ -44,23 +52,14 @@ public class UserService {
     }
 
     public String login(String userName, String password) {
-        UserEntity userEntity = userRepository.findByUserName(userName)
-                .orElseThrow(
-                        () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
-
-                );
-
-        if (!passwordEncoder.matches(password, userEntity.getPassword())) {
+        UserDto savedUser = loadUserByUserName(userName);
+        redisRepository.setUser(savedUser);
+        if (!passwordEncoder.matches(password, savedUser.getPassword())) {
             throw new SnsApplicationException(ErrorCode.INVALID_PASSWORD);
         }
         return JwtTokenUtils.generateAccessToken(userName, secretKey, expiredTime);
     }
 
-    public UserDto loadUserByUserName(String userName){
-        return userRepository.findByUserName(userName).map(UserDto::from).orElseThrow(
-                () -> new SnsApplicationException(ErrorCode.USER_NOT_FOUND)
-        );
-    }
 
 
     @Transactional

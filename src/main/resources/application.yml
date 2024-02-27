@@ -18,6 +18,12 @@ spring:
     username: ${LOCAL_DB_USERNAME}
     password: ${LOCAL_DB_PASSWORD}
 
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+
 jwt:
   secret-key: afsdjkl!@U#$IU391982FHQ#F!##!$fsa
   # 30 days
