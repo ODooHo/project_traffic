@@ -11,7 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface CommentRepository extends JpaRepository<CommentEntity,Integer> {
-    Page<CommentEntity> findAllByPost(PostEntity post, Pageable pageable);
+    @Query("SELECT c FROM CommentEntity c JOIN FETCH c.user WHERE c.post = :post")
+    Page<CommentEntity> findAllByPost(@Param("post") PostEntity post, Pageable pageable);
 
     @Transactional
     @Modifying

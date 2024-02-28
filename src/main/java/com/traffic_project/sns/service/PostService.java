@@ -123,6 +123,7 @@ public class PostService {
         PostEntity postEntity = postRepository.findById(postId).orElseThrow(
                 () -> new SnsApplicationException(ErrorCode.POST_NOT_FOUND, String.format("postId is %d", postId))
         );
+
         return commentRepository.findAllByPost(postEntity, pageable).map(CommentDto::from);
     }
 
