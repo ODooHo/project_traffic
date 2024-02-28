@@ -100,7 +100,7 @@
     client ->> server: 포스트 수정 요청
     alt 성공한 경우 
     server ->> db : 포스트 수정 요청
-    db -->> server : 수 성공 반환
+    db -->> server : 수정 성공 반환
     server -->> client: 성공 반환
     else 로그인하지 않은 경우
     server -->> client: reason code와 함께 실패 반환
