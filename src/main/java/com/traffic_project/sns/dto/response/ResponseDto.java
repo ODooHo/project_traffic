@@ -16,7 +16,7 @@ public class ResponseDto<T> {
     }
 
     public static <T> ResponseDto<T> success(T result) {
-        return new ResponseDto<T>("SUCCESS", result);
+            return new ResponseDto<T>("SUCCESS", result);
     }
 
     public static ResponseDto<Void> error(String resultCode) {
