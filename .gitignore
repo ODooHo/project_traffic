@@ -281,3 +281,9 @@ gradle-app.setting
 
 **/node_modules/**
 front-end/static/**
+
+
+.gradlew
+.gradlew.bat
+.settings.gradle
+.HELP.md
