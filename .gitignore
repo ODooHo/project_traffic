@@ -287,3 +287,10 @@ front-end/static/**
 .gradlew.bat
 .settings.gradle
 .HELP.md
+appspec.yml
+
+gradlew
+
+gradlew.bat
+
+settings.gradle
